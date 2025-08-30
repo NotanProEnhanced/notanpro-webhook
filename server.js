@@ -1,1 +1,166 @@
-{"type": "service_account","project_id": "notanpro","private_key_id": "da30343e0c454ce8060c43ad0bda40c2b38d6a7e","private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQClpPvx/9XAjmER\nWcagzD3Lzxg0AM2cy90uYzVAw/tUCVgzZfqq25WC40yx1D9/ELVodiQMgAH3sxcG\nCiziZ5TSt/HA2yvFn8BFAXmRbMwO1CNBW8M+ZRm0l81anj3a0bVM3Sz4Eav6U194\n5TwZbsVnYwLbznGu4Udt13voqpDJiXj1C/ZKBWt4+GQoMrWuOzQRowppux0Ok1Xa\nVbROv1Uhdp5FmfeMM7rI7poV1jS3PteRDxNAPuR3ga88q1arrhlCThNy6MKF/CmS\nNZyvyS+0/lq0ieWwhaP1NOo1hlYyZF+Qy7CM5gXOjFW9hnbgC5lDAxouSPPmm1s4\nkK62lypRAgMBAAECggEAF0tTWbNGW7+UwPw6EE+IpTUTd0S2+u+PGZXpXZlHVTMX\nN0CGdtP4e6FRc3Sgv/1uitPfupj0gzapQeKDxgxrrmfLKfmTIfCW+Qf9u54W4u2h\no5sETa2pZsSDpCm6vcoIpVg5RGLf0jflUOVpL+kW/l9l0y7TZ+orFwmwVYZJuZL5\nrf8XQFcPJe29rVvPhvH3TzPhTg1PuyximzbdA4vJ17vyY2YYjckNtxEuXfL6W92w\nxzmYVgdeKB/7mrVBQbOnqlSSshX+1RPlSmURlVaKkBKcVci/sILb63xXGMBJhl7s\ncn2IowceyUjEJSBp9jdMAO1vV14BNtsbCIR1OhvfjQKBgQDl1QGtMgyOOpWOMFl/\nlNHxqdfioSFVMbtO01XSRUz4uap/3riYJZttxcbc7dN2TM9YBY64b+BdM7J+H7Cv\n6UaATEUrNYaHfeZun0UICeQI8At95QM834j7jO24IkIkF1jnnvtXuJrZ3tfzVG+V\nWa1tRurgWZoxQSnNSKqtOfW53wKBgQC4gRSAIEAPoY++R/PQvUVrl/2Chd9/Rxr1\nAuc/dRP0ltHrsx05Qd3NjPVsUCEawmTZ4JlbVWjiS1CAEDlmbfmZvT5BoolqqE8R\n33oOyisKYgfg08rDodpg6zqm8Fl+Kv6mZPVXlQ18DUWD8Kb8AaSsI/qp+Jtf4Dz1\nI2bG2lQBzwKBgQDSzNIi1vrpIRa3OeV8vTTqoMtgFEYMa/bOz8uxdtqobzLQ4akR\n87xhrLs/O+tuX/j1VPOYexSgp6AZSlu2nRGK72mpvghMEc/eurqIKvo6sGD58alM\nlgKAJryK3PEpRTjICOujg7CUEG6lwlYt9/i3eApKCCUC9C+xF+tjwvt8pQKBgFph\noRFCux7tHeUwihdvIFqckesmeV14D5SGX5GOYMAoQZ0cmOw7f9P5gSAWAKGDKLQy\nee1r4X05N64ERJoQtXzCX4T3gillWZZ/yuMD1iG38/QGzAUZfEiN8qVkh/JuTWBl\nhGnq8jgaqDsB4EsC4xAQb/Jjfnlw92t+dBJlUVGxAoGBAOH3SOITO2nLnwszfe3Z\n81qQ2SjtbBrpxMU8byEE2RDeUDNt2l6UaNn+rjl3RcxR+QHhQSj9nfYxIXZoABj0\n4j0pkUYVtf9N3GyJ1mBznB0Wb4Txt1yW3o2+D65tVPAhUnARyOx4HQEj6+Qblt8M\nvmUAyoUOgj0flPwEYB3zsdJW\n-----END PRIVATE KEY-----\n","client_email": "firebase-adminsdk-fbsvc@notanpro.iam.gserviceaccount.com","client_id": "114151345396650233303","auth_uri": "https://accounts.google.com/o/oauth2/auth","token_uri": "https://oauth2.googleapis.com/token","auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs","client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40notanpro.iam.gserviceaccount.com","universe_domain": "googleapis.com"}
+const express = require('express');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const admin = require('firebase-admin');
+const cors = require('cors');
+
+// Initialize Firebase Admin SDK
+admin.initializeApp({
+  credential: admin.credential.cert({
+    type: "service_account",
+    project_id: process.env.FIREBASE_PROJECT_ID,
+    private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+    private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    client_email: process.env.FIREBASE_CLIENT_EMAIL,
+    client_id: process.env.FIREBASE_CLIENT_ID,
+    auth_uri: "https://accounts.google.com/o/oauth2/auth",
+    token_uri: "https://oauth2.googleapis.com/token",
+    auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+    client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL
+  }),
+  projectId: process.env.FIREBASE_PROJECT_ID
+});
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(cors());
+app.use('/webhook', express.raw({ type: 'application/json' }));
+app.use(express.json());
+
+// Health check endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'NotanPro Webhook Server is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Stripe webhook endpoint
+app.post('/webhook', async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // Handle the event
+  switch (event.type) {
+    case 'customer.subscription.created':
+      console.log('Subscription created:', event.data.object);
+      await handleSubscriptionCreated(event.data.object);
+      break;
+    
+    case 'customer.subscription.updated':
+      console.log('Subscription updated:', event.data.object);
+      await handleSubscriptionUpdated(event.data.object);
+      break;
+    
+    case 'customer.subscription.deleted':
+      console.log('Subscription cancelled:', event.data.object);
+      await handleSubscriptionCancelled(event.data.object);
+      break;
+    
+    case 'invoice.payment_succeeded':
+      console.log('Payment succeeded:', event.data.object);
+      await handlePaymentSucceeded(event.data.object);
+      break;
+    
+    case 'invoice.payment_failed':
+      console.log('Payment failed:', event.data.object);
+      await handlePaymentFailed(event.data.object);
+      break;
+    
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+  }
+
+  res.json({ received: true });
+});
+
+// Firebase helper functions
+async function handleSubscriptionCreated(subscription) {
+  try {
+    const db = admin.firestore();
+    await db.collection('subscriptions').doc(subscription.id).set({
+      customerId: subscription.customer,
+      status: subscription.status,
+      currentPeriodStart: new Date(subscription.current_period_start * 1000),
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+  } catch (error) {
+    console.error('Error handling subscription created:', error);
+  }
+}
+
+async function handleSubscriptionUpdated(subscription) {
+  try {
+    const db = admin.firestore();
+    await db.collection('subscriptions').doc(subscription.id).update({
+      status: subscription.status,
+      currentPeriodStart: new Date(subscription.current_period_start * 1000),
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      updatedAt: new Date()
+    });
+  } catch (error) {
+    console.error('Error handling subscription updated:', error);
+  }
+}
+
+async function handleSubscriptionCancelled(subscription) {
+  try {
+    const db = admin.firestore();
+    await db.collection('subscriptions').doc(subscription.id).update({
+      status: 'cancelled',
+      cancelledAt: new Date(),
+      updatedAt: new Date()
+    });
+  } catch (error) {
+    console.error('Error handling subscription cancelled:', error);
+  }
+}
+
+async function handlePaymentSucceeded(invoice) {
+  try {
+    const db = admin.firestore();
+    await db.collection('payments').doc(invoice.id).set({
+      customerId: invoice.customer,
+      subscriptionId: invoice.subscription,
+      amount: invoice.amount_paid,
+      currency: invoice.currency,
+      status: 'succeeded',
+      paidAt: new Date(invoice.status_transitions.paid_at * 1000),
+      createdAt: new Date()
+    });
+  } catch (error) {
+    console.error('Error handling payment succeeded:', error);
+  }
+}
+
+async function handlePaymentFailed(invoice) {
+  try {
+    const db = admin.firestore();
+    await db.collection('payments').doc(invoice.id).set({
+      customerId: invoice.customer,
+      subscriptionId: invoice.subscription,
+      amount: invoice.amount_due,
+      currency: invoice.currency,
+      status: 'failed',
+      failedAt: new Date(),
+      createdAt: new Date()
+    });
+  } catch (error) {
+    console.error('Error handling payment failed:', error);
+  }
+}
+
+app.listen(PORT, () => {
+  console.log(`NotanPro Webhook Server running on port ${PORT}`);
+});
